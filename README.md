@@ -1,5 +1,5 @@
 ## About Zebus.TinyHost
-**Zebus.TinyHost** is a lightweight host for running [Zebus](https://github.com/Abc-Arbitrage/Zebus) enabled services.
+**Zebus.TinyHost** is a lightweight host used to run [Zebus](https://github.com/Abc-Arbitrage/Zebus) enabled services.
 
 ### Introduction
 As a peer to peer service bus, the main goal of Zebus is to allow applications to communicate with each other.
