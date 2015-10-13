@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using Abc.Zebus.Dispatch;
 using Abc.Zebus.Hosting;
 using Abc.Zebus.Initialization;
 using Abc.Zebus.TinyHost.Configuration; 
@@ -10,7 +8,6 @@ using Abc.Zebus.Transport;
 using log4net;
 using StructureMap;
 using StructureMap.Graph;
-
 
 namespace Abc.Zebus.TinyHost
 {
@@ -20,6 +17,37 @@ namespace Abc.Zebus.TinyHost
         private Container _container;
         private IBus _bus;
 
+        public Host()
+        {
+            ContainerFactory = CreateAndConfigureContainer;
+        }
+
+        private static Container CreateAndConfigureContainer()
+        {
+            var container = new Container();
+
+            container.Configure(c => c.AddRegistry<ZebusRegistry>());
+            container.Configure(x => x.ForSingletonOf<ISettingsReader>().Use(new AppSettingsReader()));
+            container.Configure(cfg =>
+            {
+                cfg.ForSingletonOf<IBusConfiguration>().Use<BusConfiguration>();
+                cfg.ForSingletonOf<IZmqTransportConfiguration>().Use<ZmqTransportConfiguration>();
+            });
+
+            container.Configure(cfg =>
+            {
+                cfg.Scan(x =>
+                {
+                    AddAssembliesToScan(x);
+                    x.LookForRegistries();
+                    x.With(new HostInitializerRegistrationConvention());
+                });
+            });
+            return container;
+        }
+
+        internal Func<Container> ContainerFactory { get; set; }
+
         public void Start()
         {
             try
@@ -28,19 +56,7 @@ namespace Abc.Zebus.TinyHost
                 _logger.Info($"User: {Environment.UserName}");
                 _logger.Info($"PID: {Process.GetCurrentProcess().Id}");
 
-                _container = new Container();
-                _container.Configure(container => container.AddRegistry<ZebusRegistry>());
-
-                _container.Configure(x =>
-                {
-                    x.ForSingletonOf<ISettingsReader>().Use(new AppSettingsReader());
-                });
-                 
-                _container.Configure(cfg =>
-                {
-                    cfg.ForSingletonOf<IBusConfiguration>().Use<BusConfiguration>();
-                    cfg.ForSingletonOf<IZmqTransportConfiguration>().Use<ZmqTransportConfiguration>();
-                });
+                _container = ContainerFactory.Invoke();
 
                 _bus = _container.GetInstance<IBus>();
 
@@ -123,19 +139,6 @@ namespace Abc.Zebus.TinyHost
             {
                 _logger.ErrorFormat("Unable to stop bus: {0}", ex);
             }
-        }
-
-        private void LoadRegistries(Func<Assembly, bool> assemblyFilter)
-        {
-            _container.Configure(cfg =>
-            {
-                cfg.Scan(x =>
-                {
-                    AddAssembliesToScan(x);
-                    x.LookForRegistries();
-                    x.With(new HostInitializerRegistrationConvention());
-                });
-            });
         }
 
         private static void AddAssembliesToScan(IAssemblyScanner assemblyScanner)
