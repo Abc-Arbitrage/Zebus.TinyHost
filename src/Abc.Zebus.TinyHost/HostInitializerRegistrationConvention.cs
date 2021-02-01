@@ -1,22 +1,25 @@
-using System;
 using Abc.Zebus.Hosting;
-using StructureMap.Configuration.DSL;
+using StructureMap;
 using StructureMap.Graph;
+using StructureMap.Graph.Scanning;
 using StructureMap.TypeRules;
 
 namespace Abc.Zebus.TinyHost
 {
     public class HostInitializerRegistrationConvention : IRegistrationConvention
     {
-        public void Process(Type type, Registry registry)
+        public void ScanTypes(TypeSet types, Registry registry)
         {
-            if (!typeof(HostInitializer).IsAssignableFrom(type))
-                return;
+            foreach (var type in types.AllTypes())
+            {
+                if (!typeof(HostInitializer).IsAssignableFrom(type))
+                    continue;
 
-            if (!type.CanBeCreated() || type.ContainsGenericParameters)
-                return;
+                if (!type.CanBeCreated() || type.ContainsGenericParameters)
+                    continue;
 
-            registry.For(typeof(HostInitializer)).Singleton().Add(ctx => ctx.GetInstance(type));
+                registry.For(typeof(HostInitializer)).Singleton().Add(ctx => ctx.GetInstance(type));
+            }
         }
     }
 }

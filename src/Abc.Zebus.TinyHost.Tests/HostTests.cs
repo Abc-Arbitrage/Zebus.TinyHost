@@ -1,7 +1,5 @@
-﻿using System;
-using Abc.Zebus.Hosting;
+﻿using Abc.Zebus.Hosting;
 using Abc.Zebus.Testing;
-using Abc.Zebus.Testing.Extensions;
 using NUnit.Framework;
 using StructureMap;
 
@@ -34,12 +32,12 @@ namespace Abc.Zebus.TinyHost.Tests
             host.Start();
             host.Stop();
 
-            testHostInitializer.CapturedContainer.ShouldEqual(container);
-            testHostInitializer.ConfigureContainerCounterValue.ShouldEqual(0);
-            testHostInitializer.BeforeStartCounterValue.ShouldEqual(0);
-            testHostInitializer.AfterStartCounterValue.ShouldEqual(2);
-            testHostInitializer.BeforeStopCounterValue.ShouldEqual(2);
-            testHostInitializer.AfterStopCounterValue.ShouldEqual(4);
+            Assert.That(testHostInitializer.CapturedContainer, Is.EqualTo(container));
+            Assert.That(testHostInitializer.ConfigureContainerCounterValue, Is.EqualTo(0));
+            Assert.That(testHostInitializer.BeforeStartCounterValue, Is.EqualTo(0));
+            Assert.That(testHostInitializer.AfterStartCounterValue, Is.EqualTo(2));
+            Assert.That(testHostInitializer.BeforeStopCounterValue, Is.EqualTo(2));
+            Assert.That(testHostInitializer.AfterStopCounterValue, Is.EqualTo(4));
         }
 
         private class Counter
