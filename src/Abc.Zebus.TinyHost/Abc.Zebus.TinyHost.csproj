@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.14" />
+    <PackageReference Include="log4net" Version="3.3.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0.0" />
     <PackageReference Include="Zebus" Version="3.8.0" />
   </ItemGroup>
